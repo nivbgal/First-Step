@@ -14,6 +14,8 @@ final class StepsViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published private(set) var activeJourney: Journey?
+    @Published private(set) var sideQuests: [SideQuest] = SampleData.sideQuests
+    @Published private(set) var sideQuestEvaluations: [UUID: SideQuestEvaluation] = [:]
 
     /// Reflects the underlying HealthKitManager's authorization state.
     var isAuthorized: Bool {
@@ -26,6 +28,28 @@ final class StepsViewModel: ObservableObject {
         self.healthKitManager = healthKitManager
         // Pre-load a sample journey so the UI has something to show.
         activeJourney = SampleData.enchantedForestJourney
+        refreshSideQuestEvaluations()
+    }
+
+    /// Loads any restorable HealthKit state and existing step data on appear.
+    func loadOnAppear() async {
+        isLoading = true
+        errorMessage = nil
+
+        await healthKitManager.refreshAuthorizationState()
+
+        if healthKitManager.isAuthorized {
+            await healthKitManager.fetchTodaySteps()
+            todaySteps = healthKitManager.todaySteps
+            formattedSteps = StepFormatter.formattedSteps(todaySteps)
+        }
+
+        if let error = healthKitManager.errorMessage {
+            errorMessage = error
+        }
+
+        updateProgress()
+        isLoading = false
     }
 
     /// Requests HealthKit permission and loads today's steps.
@@ -63,11 +87,31 @@ final class StepsViewModel: ObservableObject {
         guard let journey = activeJourney else {
             formattedPercent = "0%"
             formattedDistance = "0 m"
+            refreshSideQuestEvaluations()
             return
         }
         let prog = JourneyEngine.calculateProgress(journey: journey, steps: todaySteps)
         progress = prog
         formattedPercent = StepFormatter.formattedPercent(prog.percentComplete)
         formattedDistance = StepFormatter.formattedDistance(meters: prog.metersCompleted)
+        refreshSideQuestEvaluations()
+    }
+
+    func sideQuestEvaluation(for quest: SideQuest) -> SideQuestEvaluation {
+        sideQuestEvaluations[quest.id] ?? .planned()
+    }
+
+    private func refreshSideQuestEvaluations() {
+        let snapshot = SideQuestActivitySnapshot(
+            totalStepsToday: todaySteps,
+            hourlySteps: [:],
+            now: Date()
+        )
+
+        sideQuestEvaluations = Dictionary(
+            uniqueKeysWithValues: sideQuests.map { quest in
+                (quest.id, SideQuestEngine.evaluate(quest: quest, activity: snapshot))
+            }
+        )
     }
 }

@@ -18,23 +18,23 @@ enum SampleData {
         SideQuest(
             title: "Morning Stride",
             description: "Walk 2,000 steps before 9 AM",
-            targetSteps: 2_000,
+            rule: .stepGoalBeforeHour(2_000, cutoffHour: 9),
             iconName: "sunrise.fill",
-            isComplete: false
+            availability: .planned
         ),
         SideQuest(
             title: "Steady Pace",
             description: "Log steps in 3 consecutive hours",
-            targetSteps: 3_000,
+            rule: .consecutiveActiveHours(3, minimumStepsPerHour: 1_000),
             iconName: "timer",
-            isComplete: false
+            availability: .planned
         ),
         SideQuest(
             title: "Explorer",
             description: "Reach 10,000 steps in a single day",
-            targetSteps: 10_000,
+            rule: .stepGoal(10_000),
             iconName: "map.fill",
-            isComplete: false
+            availability: .planned
         ),
     ]
 

@@ -27,10 +27,7 @@ struct HomeView: View {
         }
         .navigationViewStyle(.stack)
         .task {
-            // Auto-load steps on appear if already authorized
-            if viewModel.isAuthorized {
-                await viewModel.connectAndLoadSteps()
-            }
+            await viewModel.loadOnAppear()
         }
         .alert("HealthKit Error", isPresented: $showHealthKitError) {
             Button("OK", role: .cancel) {}
@@ -137,8 +134,11 @@ struct HomeView: View {
                     .foregroundColor(AppTheme.accent)
             }
 
-            ForEach(SampleData.sideQuests) { quest in
-                SideQuestCardView(quest: quest, currentSteps: viewModel.todaySteps)
+            ForEach(viewModel.sideQuests) { quest in
+                SideQuestCardView(
+                    quest: quest,
+                    evaluation: viewModel.sideQuestEvaluation(for: quest)
+                )
             }
         }
     }

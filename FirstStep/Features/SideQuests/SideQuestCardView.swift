@@ -3,27 +3,40 @@ import SwiftUI
 /// Compact card for a single side-quest challenge.
 struct SideQuestCardView: View {
     let quest: SideQuest
-    let currentSteps: Int
+    let evaluation: SideQuestEvaluation
 
-    private var progress: Double {
-        guard quest.targetSteps > 0 else { return 0 }
-        return min(Double(currentSteps) / Double(quest.targetSteps), 1.0)
+    private var badgeColor: Color {
+        switch evaluation.state {
+        case .planned:
+            return .secondary
+        case .inProgress:
+            return AppTheme.accent
+        case .completed:
+            return AppTheme.successGreen
+        }
     }
 
-    private var isComplete: Bool {
-        currentSteps >= quest.targetSteps
+    private var badgeBackground: Color {
+        switch evaluation.state {
+        case .planned:
+            return Color.gray.opacity(0.12)
+        case .inProgress:
+            return AppTheme.accent.opacity(0.12)
+        case .completed:
+            return AppTheme.successGreen.opacity(0.15)
+        }
     }
 
     var body: some View {
         HStack(spacing: AppTheme.spacingMD) {
             ZStack {
                 Circle()
-                    .fill(isComplete ? AppTheme.successGreen.opacity(0.15) : AppTheme.accent.opacity(0.12))
+                    .fill(badgeBackground)
                     .frame(width: 44, height: 44)
 
-                Image(systemName: isComplete ? "checkmark" : quest.iconName)
+                Image(systemName: evaluation.state == .completed ? "checkmark" : quest.iconName)
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(isComplete ? AppTheme.successGreen : AppTheme.accent)
+                    .foregroundColor(badgeColor)
             }
 
             VStack(alignment: .leading, spacing: AppTheme.spacingXS) {
@@ -34,17 +47,15 @@ struct SideQuestCardView: View {
                 Text(quest.description)
                     .font(.caption)
                     .foregroundColor(.secondary)
-                    .lineLimit(1)
+                    .lineLimit(2)
             }
 
             Spacer()
 
-            if !isComplete {
-                Text("\(Int(progress * 100))%")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-            }
+            Text(evaluation.statusText)
+                .font(.caption)
+                .fontWeight(.medium)
+                .foregroundColor(badgeColor)
         }
         .padding(AppTheme.spacingMD)
         .background(AppTheme.cardBackground)

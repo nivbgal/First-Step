@@ -20,7 +20,7 @@ FirstStep/
 │   │   ├── StepCardView.swift      Circular step-count display
 │   │   └── JourneyCardView.swift   Active journey progress card
 │   └── SideQuests/
-│       └── SideQuestCardView.swift Side-quest challenge card
+│       └── SideQuestCardView.swift Side-quest placeholder/status card
 └── Core/
     ├── Models/
     │   ├── Journey.swift           Active journey state
@@ -30,17 +30,22 @@ FirstStep/
     │   ├── FantasyDestination.swift Fantasy target with milestones
     │   ├── FantasyBiome.swift      Five biome types
     │   ├── SideQuest.swift         In-app challenge model
+    │   ├── SideQuestRule.swift     Deferred side-quest rule definitions
+    │   ├── SideQuestEvaluation.swift Side-quest evaluation state
     │   └── SampleData.swift        Demo journeys and quests
     ├── Services/
     │   ├── BackendService.swift    Firebase contract + stub
+    │   ├── JourneyPlanningService.swift Prompt-to-route orchestration + stubs
     │   ├── FantasySceneService.swift Scene generation contract + stub
     │   ├── RouteProgressService.swift MapKit contract + stub
     │   └── StreetViewService.swift Street View contract + stub
     ├── Managers/
     │   ├── HealthKitManager.swift  HealthKit auth + step queries
-    │   └── JourneyEngine.swift     Steps → meters → percent
+    │   ├── JourneyEngine.swift     Steps → meters → percent
+    │   └── SideQuestEngine.swift   Future side-quest evaluator
     ├── ViewModels/
-    │   └── StepsViewModel.swift    State coordinator for Home
+    │   ├── StepsViewModel.swift    State coordinator for Home
+    │   └── JourneyPromptViewModel.swift Prompted journey planner state
     ├── Utilities/
     │   └── StepFormatter.swift     Number formatting helpers
     └── Theme/
@@ -54,7 +59,7 @@ FirstStep/
 | **Home / Dashboard** | Header with date, circular step-count ring, HealthKit connect button, active journey progress card, side-quest list |
 | **Step Card** | Animated circular progress ring showing today's steps against a 10K goal |
 | **Journey Card** | Journey name, linear progress bar, distance walked, destination type badge |
-| **Side Quest Cards** | Mini-challenge cards with icon, description, and completion percentage |
+| **Side Quest Cards** | Placeholder challenge cards that expose deferred rules/status without fake completion logic |
 
 ### HealthKit Integration
 
@@ -70,6 +75,8 @@ FirstStep/
 - **Protocol-oriented services** — every external dependency is behind a protocol with a stub
 - **`@MainActor` safety** — HealthKitManager and StepsViewModel are main-actor isolated
 - **Sample data** — demo journey and side quests are pre-loaded so the UI demonstrates real visuals
+- **Deferred side-quest engine** — side-quest rule types and evaluation states exist now, while complex rule execution remains turned off
+- **Prompt-to-journey planning layer** — free-form user prompts can flow through real-route lookup first and AI generation as a fallback
 - **Design system** — `AppTheme` provides consistent colors, gradients, spacing, and corner radii
 
 ### Placeholders for Future Milestones
@@ -77,10 +84,11 @@ FirstStep/
 | Future Feature | Current State |
 |---|---|
 | Firebase backend | `BackendService` protocol + `StubBackendService` |
+| Prompted custom routes | `JourneyPlanningService` + `JourneyPromptViewModel` scaffolding; no UI yet |
 | Route visualization | `RouteProgressService` protocol + stub |
 | Street View imagery | `StreetViewService` protocol + stub |
 | Fantasy scene generation | `FantasySceneService` protocol + stub |
-| Destination picker | Sample journey auto-loaded; picker UI not yet built |
+| Destination picker | Sample journey auto-loaded; prompt/picker UI not yet built |
 | Apple Watch companion | Deferred to a later milestone |
 
 ## Setup
@@ -129,13 +137,14 @@ swift build   # validates syntax; HealthKit APIs require iOS SDK stubs
 
 ### Milestone 4: Destination Catalog & Journey Selection
 - Build a destination picker UI (real-world and fantasy)
+- Add a free-form prompt flow that attempts a real-world route lookup before generating a custom fantasy trail
 - Seed initial destination data
 - Wire up journey creation flow
 
 ### Milestone 5: Route Visualization & Side Quests
 - Integrate MapKit for real-world route display
 - Build fantasy scene rendering
-- Implement side-quest completion logic with HealthKit triggers
+- Implement side-quest rule evaluation with richer HealthKit activity inputs
 
 ### Milestone 6: Apple Watch Companion
 - Add watchOS target

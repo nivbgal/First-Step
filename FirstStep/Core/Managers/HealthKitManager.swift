@@ -36,6 +36,34 @@ final class HealthKitManager: ObservableObject {
         }
     }
 
+    /// Restores whether HealthKit access has already been granted.
+    func refreshAuthorizationState() async {
+        guard isAvailable else {
+            errorMessage = "HealthKit is not available on this device."
+            isAuthorized = false
+            return
+        }
+
+        do {
+            let requestStatus = try await withCheckedThrowingContinuation {
+                (continuation: CheckedContinuation<HKAuthorizationRequestStatus, Error>) in
+                healthStore.getRequestStatusForAuthorization(toShare: [], read: [stepCountType]) { status, error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume(returning: status)
+                    }
+                }
+            }
+
+            isAuthorized = requestStatus == .unnecessary
+            errorMessage = nil
+        } catch {
+            isAuthorized = false
+            errorMessage = "Failed to refresh HealthKit state: \(error.localizedDescription)"
+        }
+    }
+
     /// Reads today's cumulative step count.
     func fetchTodaySteps() async {
         guard isAvailable else { return }
