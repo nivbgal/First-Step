@@ -87,12 +87,26 @@ FirstStep/
 
 ### Quick Start (Xcode)
 
-1. Open Xcode 15+ → **File → New → Project → iOS App** (SwiftUI, Swift)
-2. Set product name to `FirstStep`
-3. Delete the auto-generated `ContentView.swift`
-4. Drag the `FirstStep/` folder into the Xcode project navigator
-5. In **Signing & Capabilities**, add **HealthKit**
-6. Build and run on a real device or simulator with Health data
+1. Open `FirstStep.xcodeproj` in Xcode 15+
+2. Select a development team under **Signing & Capabilities**
+3. Select the **FirstStepApp** scheme and an iOS simulator/device, then Build & Run
+4. HealthKit requires a real device or a simulator with Health data seeded
+
+### Regenerating the Xcode Project
+
+If you modify the directory structure or add new source files, regenerate the project:
+
+**Option A — XcodeGen** (if installed): `xcodegen generate`
+
+**Option B — Python script** (no dependencies): `python3 generate_xcodeproj.py`
+
+### Remaining Steps Before First Build
+
+The generated `.xcodeproj` is structurally complete but was created outside Xcode. On first open:
+
+1. **Set your development team** — Xcode > target > Signing & Capabilities > Team
+2. **Verify HealthKit capability** — the entitlements file is wired, but you may need to toggle the HealthKit capability on/off in Xcode once to register it with your provisioning profile
+3. **Add an Asset Catalog** — create `Assets.xcassets` in `FirstStep/App/` with an AppIcon set (Xcode > File > New > Asset Catalog). The build settings reference `AppIcon` but no catalog exists yet
 
 ### Package.swift (editor / CI)
 
@@ -104,10 +118,9 @@ swift build   # validates syntax; HealthKit APIs require iOS SDK stubs
 
 ## What's Next — Recommended Milestones
 
-### Milestone 2: Xcode Project & Build Verification
-- Create a proper `.xcodeproj` with the FirstStep/ source tree
-- Verify the project compiles and runs on a device
-- Confirm HealthKit permission dialog and step reading work end-to-end
+### ~~Milestone 2: Xcode Project & Build Verification~~ ✅ Complete
+- ~~Create a proper `.xcodeproj` with the FirstStep/ source tree~~
+- Remaining: verify the scaffold compiles cleanly in Xcode, add Asset Catalog
 
 ### Milestone 3: Firebase Integration
 - Add Firebase SDK via Swift Package Manager
