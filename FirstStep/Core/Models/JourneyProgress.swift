@@ -8,7 +8,13 @@ struct JourneyProgress: Codable, Equatable {
     var percentComplete: Double
     var lastUpdated: Date
 
-    init(journeyID: UUID, stepsCompleted: Int = 0, metersCompleted: Double = 0, percentComplete: Double = 0, lastUpdated: Date = Date()) {
+    init(
+        journeyID: UUID,
+        stepsCompleted: Int = 0,
+        metersCompleted: Double = 0,
+        percentComplete: Double = 0,
+        lastUpdated: Date = Date()
+    ) {
         self.journeyID = journeyID
         self.stepsCompleted = stepsCompleted
         self.metersCompleted = metersCompleted

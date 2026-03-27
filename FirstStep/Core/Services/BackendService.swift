@@ -24,17 +24,13 @@ struct StubBackendService: BackendService {
         return UUID().uuidString
     }
 
-    func saveJourney(_ journey: Journey) async throws {
-        // No-op stub
-    }
+    func saveJourney(_ journey: Journey) async throws {}
 
     func fetchActiveJourney(forUser userID: String) async throws -> Journey? {
         return nil
     }
 
-    func updateProgress(_ progress: JourneyProgress) async throws {
-        // No-op stub
-    }
+    func updateProgress(_ progress: JourneyProgress) async throws {}
 
     func fetchProgress(forJourney journeyID: UUID) async throws -> JourneyProgress? {
         return nil

@@ -1,4 +1,5 @@
 import Foundation
+import CoreGraphics
 
 /// Fetches street-level imagery for a given coordinate.
 /// Future implementation will integrate with Google Street View Static API.
@@ -11,7 +12,6 @@ protocol StreetViewService {
 
 struct StubStreetViewService: StreetViewService {
     func fetchImage(at coordinate: Coordinate, size: CGSize) async throws -> Data {
-        // Placeholder: returns empty data. Replace with actual API call.
         return Data()
     }
 }

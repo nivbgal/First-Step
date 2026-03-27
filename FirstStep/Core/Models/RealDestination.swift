@@ -1,5 +1,4 @@
 import Foundation
-import CoreLocation
 
 /// A real-world destination the user can walk toward.
 struct RealDestination: Identifiable, Codable, Equatable {

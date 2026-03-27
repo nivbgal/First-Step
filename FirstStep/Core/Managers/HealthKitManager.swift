@@ -2,6 +2,9 @@ import Foundation
 import HealthKit
 
 /// Manages HealthKit authorization and step-count queries.
+///
+/// Reads today's cumulative step count — this includes steps recorded
+/// by Apple Watch and any other sources synced into HealthKit.
 @MainActor
 final class HealthKitManager: ObservableObject {
     @Published var todaySteps: Int = 0
@@ -39,10 +42,15 @@ final class HealthKitManager: ObservableObject {
 
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
-        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date(), options: .strictStartDate)
+        let predicate = HKQuery.predicateForSamples(
+            withStart: startOfDay,
+            end: Date(),
+            options: .strictStartDate
+        )
 
         do {
-            let statistics = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<HKStatistics, Error>) in
+            let statistics = try await withCheckedThrowingContinuation {
+                (continuation: CheckedContinuation<HKStatistics, Error>) in
                 let query = HKStatisticsQuery(
                     quantityType: stepCountType,
                     quantitySamplePredicate: predicate,
@@ -53,7 +61,14 @@ final class HealthKitManager: ObservableObject {
                     } else if let statistics = statistics {
                         continuation.resume(returning: statistics)
                     } else {
-                        continuation.resume(returning: HKStatistics(quantityType: self.stepCountType, quantitySamplePredicate: predicate, options: .cumulativeSum))
+                        // No data yet today — return empty statistics
+                        continuation.resume(
+                            returning: HKStatistics(
+                                quantityType: self.stepCountType,
+                                quantitySamplePredicate: predicate,
+                                options: .cumulativeSum
+                            )
+                        )
                     }
                 }
                 healthStore.execute(query)

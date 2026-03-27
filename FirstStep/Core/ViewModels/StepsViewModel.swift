@@ -1,6 +1,9 @@
 import Foundation
 
-/// ViewModel for displaying step count and journey progress on both iOS and watchOS.
+/// ViewModel coordinating HealthKit step data with journey progress.
+///
+/// On first connect it loads a sample journey so the UI demonstrates real
+/// progress visuals. A destination picker will replace this in a future milestone.
 @MainActor
 final class StepsViewModel: ObservableObject {
     @Published var todaySteps: Int = 0
@@ -10,12 +13,19 @@ final class StepsViewModel: ObservableObject {
     @Published var formattedDistance: String = "0 m"
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    @Published private(set) var activeJourney: Journey?
+
+    /// Reflects the underlying HealthKitManager's authorization state.
+    var isAuthorized: Bool {
+        healthKitManager.isAuthorized
+    }
 
     private let healthKitManager: HealthKitManager
-    private var activeJourney: Journey?
 
     init(healthKitManager: HealthKitManager) {
         self.healthKitManager = healthKitManager
+        // Pre-load a sample journey so the UI has something to show.
+        activeJourney = SampleData.enchantedForestJourney
     }
 
     /// Requests HealthKit permission and loads today's steps.

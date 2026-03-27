@@ -1,62 +1,113 @@
 # First Step
 
-**First Step** is an iOS + Apple Watch app that gamifies walking by turning your daily steps into virtual journeys to real-world and fantasy destinations.
+**First Step** is a native SwiftUI iPhone app that gamifies walking by turning your daily steps into virtual journeys to real-world and fantasy destinations.
 
-## Current State — Initial Scaffold
+## V1 Scope — iPhone Only
 
-This is the foundational codebase scaffold. It establishes the project structure, core domain models, service abstractions, and minimal UI for both iOS and watchOS. No third-party SDKs (Firebase, Google Maps) are integrated yet — only protocols and stubs are in place.
+This milestone establishes the iPhone-only native foundation. There is **no separate Apple Watch target** in V1 — step data recorded by Apple Watch (or any other source) is read through HealthKit on the iPhone.
 
 ### What's Included
 
-#### Shared Core (`Shared/`)
+```
+FirstStep/
+├── App/
+│   ├── FirstStepApp.swift          App entry point
+│   ├── Info.plist                  HealthKit usage description
+│   └── FirstStep.entitlements      HealthKit capability
+├── Features/
+│   ├── Home/
+│   │   ├── HomeView.swift          Main dashboard screen
+│   │   ├── StepCardView.swift      Circular step-count display
+│   │   └── JourneyCardView.swift   Active journey progress card
+│   └── SideQuests/
+│       └── SideQuestCardView.swift Side-quest challenge card
+└── Core/
+    ├── Models/
+    │   ├── Journey.swift           Active journey state
+    │   ├── JourneyProgress.swift   Progress tracking
+    │   ├── DestinationType.swift   Real vs fantasy enum
+    │   ├── RealDestination.swift   Real-world target + Coordinate
+    │   ├── FantasyDestination.swift Fantasy target with milestones
+    │   ├── FantasyBiome.swift      Five biome types
+    │   ├── SideQuest.swift         In-app challenge model
+    │   └── SampleData.swift        Demo journeys and quests
+    ├── Services/
+    │   ├── BackendService.swift    Firebase contract + stub
+    │   ├── FantasySceneService.swift Scene generation contract + stub
+    │   ├── RouteProgressService.swift MapKit contract + stub
+    │   └── StreetViewService.swift Street View contract + stub
+    ├── Managers/
+    │   ├── HealthKitManager.swift  HealthKit auth + step queries
+    │   └── JourneyEngine.swift     Steps → meters → percent
+    ├── ViewModels/
+    │   └── StepsViewModel.swift    State coordinator for Home
+    ├── Utilities/
+    │   └── StepFormatter.swift     Number formatting helpers
+    └── Theme/
+        └── AppTheme.swift          Colors, spacing, corner radii
+```
 
-| Layer | Files | Description |
-|-------|-------|-------------|
-| **Models** | `Journey.swift`, `DestinationType.swift`, `RealDestination.swift`, `FantasyDestination.swift`, `FantasyBiome.swift`, `JourneyProgress.swift` | Domain model types for journeys, destinations (real and fantasy), biome definitions, and progress tracking. |
-| **Services** | `RouteProgressService.swift`, `StreetViewService.swift`, `FantasySceneService.swift`, `BackendService.swift` | Protocol definitions + stub implementations for route progress (MapKit-ready), street-view imagery (Google Street View-ready), fantasy scene generation, and Firebase backend persistence. |
-| **Managers** | `HealthKitManager.swift`, `JourneyEngine.swift` | `HealthKitManager` requests HealthKit authorization and reads today's cumulative step count. `JourneyEngine` converts steps → meters → percent-complete for a given journey. |
-| **ViewModels** | `StepsViewModel.swift` | Observable view model that coordinates HealthKit data with journey progress, shared by iOS and watchOS. |
-| **Utilities** | `StepFormatter.swift` | Formatting helpers for step counts, distances, and percentages. |
+### iPhone Screens
 
-#### iOS App (`FirstStepApp/`)
-
-- `FirstStepApp.swift` — SwiftUI app entry point
-- `ContentView.swift` — Main screen with app title, today's step count, HealthKit connect button, and journey progress summary
-- `Info.plist` — HealthKit usage description
-
-#### watchOS App (`FirstStepWatchApp/`)
-
-- `FirstStepWatchApp.swift` — SwiftUI watchOS app entry point
-- `WatchContentView.swift` — Compact watch view with steps, progress percentage, distance, and a load button
-- `Info.plist` — HealthKit usage description
+| Screen | Description |
+|--------|-------------|
+| **Home / Dashboard** | Header with date, circular step-count ring, HealthKit connect button, active journey progress card, side-quest list |
+| **Step Card** | Animated circular progress ring showing today's steps against a 10K goal |
+| **Journey Card** | Journey name, linear progress bar, distance walked, destination type badge |
+| **Side Quest Cards** | Mini-challenge cards with icon, description, and completion percentage |
 
 ### HealthKit Integration
 
-- Requests **read-only** access to step count data (`HKQuantityType.stepCount`)
-- Reads today's cumulative step count using `HKStatisticsQuery`
-- Uses modern Swift concurrency (`async/await` with `CheckedContinuation`)
+- **Read-only** access to `HKQuantityType.stepCount`
+- Reads today's cumulative steps using `HKStatisticsQuery` (includes Apple Watch data)
+- Modern Swift concurrency (`async/await` with `CheckedContinuation`)
+- Authorization request with user-facing usage description
+- Error states surfaced via alert
 
-### Architecture Notes
+### Architecture
 
-- **SwiftUI-first** — all views use SwiftUI with `@StateObject` / `@ObservedObject` patterns
-- **Protocol-oriented services** — every external dependency is behind a protocol with a stub implementation, making it easy to swap in real implementations
-- **Shared code** — models, services, managers, and view models live in `Shared/` and are intended to be compiled into both the iOS and watchOS targets
-- **No secrets committed** — Firebase config, API keys, and xcconfig files are gitignored
+- **SwiftUI-first** — all views use `@StateObject` / `@ObservedObject`
+- **Protocol-oriented services** — every external dependency is behind a protocol with a stub
+- **`@MainActor` safety** — HealthKitManager and StepsViewModel are main-actor isolated
+- **Sample data** — demo journey and side quests are pre-loaded so the UI demonstrates real visuals
+- **Design system** — `AppTheme` provides consistent colors, gradients, spacing, and corner radii
+
+### Placeholders for Future Milestones
+
+| Future Feature | Current State |
+|---|---|
+| Firebase backend | `BackendService` protocol + `StubBackendService` |
+| Route visualization | `RouteProgressService` protocol + stub |
+| Street View imagery | `StreetViewService` protocol + stub |
+| Fantasy scene generation | `FantasySceneService` protocol + stub |
+| Destination picker | Sample journey auto-loaded; picker UI not yet built |
+| Apple Watch companion | Deferred to a later milestone |
 
 ## Setup
 
-1. Open the project in Xcode 15+
-2. Create an Xcode project/workspace that references these source files (or set up an Xcode project with the directory structure)
-3. Add the HealthKit capability to both the iOS and watchOS targets
-4. Add `Shared/` sources to both targets
-5. Build and run on a device (HealthKit requires a real device or simulator with Health data)
+### Quick Start (Xcode)
 
-## What's Next — Recommended MVP Milestones
+1. Open Xcode 15+ → **File → New → Project → iOS App** (SwiftUI, Swift)
+2. Set product name to `FirstStep`
+3. Delete the auto-generated `ContentView.swift`
+4. Drag the `FirstStep/` folder into the Xcode project navigator
+5. In **Signing & Capabilities**, add **HealthKit**
+6. Build and run on a real device or simulator with Health data
+
+### Package.swift (editor / CI)
+
+A `Package.swift` is included for editor autocomplete and CI linting. It is **not** the shipping build system — HealthKit entitlements require a real Xcode project.
+
+```bash
+swift build   # validates syntax; HealthKit APIs require iOS SDK stubs
+```
+
+## What's Next — Recommended Milestones
 
 ### Milestone 2: Xcode Project & Build Verification
-- Create a proper `.xcodeproj` / `.xcworkspace` with iOS and watchOS targets
-- Verify the scaffold compiles cleanly on both platforms
-- Add HealthKit entitlements to both targets
+- Create a proper `.xcodeproj` with the FirstStep/ source tree
+- Verify the project compiles and runs on a device
+- Confirm HealthKit permission dialog and step reading work end-to-end
 
 ### Milestone 3: Firebase Integration
 - Add Firebase SDK via Swift Package Manager
@@ -68,15 +119,16 @@ This is the foundational codebase scaffold. It establishes the project structure
 - Seed initial destination data
 - Wire up journey creation flow
 
-### Milestone 5: Route Visualization
+### Milestone 5: Route Visualization & Side Quests
 - Integrate MapKit for real-world route display
-- Build fantasy scene rendering (static assets or AI-generated)
-- Add progress visualization along the route
+- Build fantasy scene rendering
+- Implement side-quest completion logic with HealthKit triggers
 
-### Milestone 6: Watch Companion & Live Updates
+### Milestone 6: Apple Watch Companion
+- Add watchOS target
 - Implement WatchConnectivity for syncing journey state
-- Add background HealthKit delivery for passive step updates
-- Build watch complications for at-a-glance progress
+- Background HealthKit delivery for passive step updates
+- Watch complications
 
 ## License
 

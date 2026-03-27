@@ -14,10 +14,9 @@ protocol RouteProgressService {
 
 struct StubRouteProgressService: RouteProgressService {
     func fetchRoute(to destination: RealDestination) async throws -> [Coordinate] {
-        // Placeholder: returns origin and destination only.
         return [
             Coordinate(latitude: 0, longitude: 0),
-            destination.coordinate
+            destination.coordinate,
         ]
     }
 
