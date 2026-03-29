@@ -6,7 +6,10 @@ struct FirstStepApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView(healthKitManager: healthKitManager)
+            // Switch to AdventureView for the game-like experience
+            AdventureView(healthKitManager: healthKitManager)
+            // To switch back to the original simple version, use:
+            // HomeView(healthKitManager: healthKitManager)
         }
     }
 }
