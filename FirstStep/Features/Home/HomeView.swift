@@ -10,7 +10,7 @@ struct HomeView: View {
     }
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(spacing: AppTheme.spacingLG) {
                     headerSection
@@ -23,9 +23,8 @@ struct HomeView: View {
                 .padding(.bottom, AppTheme.spacingXL)
             }
             .background(AppTheme.subtleBackground.ignoresSafeArea())
-            .navigationBarHidden(true)
+            .toolbar(.hidden, for: .navigationBar)
         }
-        .navigationViewStyle(.stack)
         .task {
             await viewModel.loadOnAppear()
         }
@@ -90,39 +89,12 @@ struct HomeView: View {
     }
 
     private var journeySection: some View {
-        Group {
-            if let journey = viewModel.activeJourney {
-                JourneyCardView(
-                    journeyName: journey.name,
-                    formattedDistance: viewModel.formattedDistance,
-                    formattedPercent: viewModel.formattedPercent,
-                    percentComplete: viewModel.progress?.percentComplete ?? 0,
-                    destinationType: journey.destinationType
-                )
-            } else {
-                noJourneyPlaceholder
-            }
-        }
-    }
-
-    private var noJourneyPlaceholder: some View {
-        VStack(spacing: AppTheme.spacingMD) {
-            Image(systemName: "map")
-                .font(.system(size: 32))
-                .foregroundColor(.secondary.opacity(0.5))
-            Text("No active journey")
-                .font(.headline)
-                .foregroundColor(.secondary)
-            Text("A destination picker is coming in the next milestone. For now, a sample journey is loaded automatically.")
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding(AppTheme.spacingLG)
-        .frame(maxWidth: .infinity)
-        .background(AppTheme.cardBackground)
-        .cornerRadius(AppTheme.cornerRadiusLG)
-        .shadow(color: .black.opacity(0.04), radius: AppTheme.cardShadowRadius, y: AppTheme.cardShadowY)
+        JourneySectionView(
+            activeJourney: viewModel.activeJourney,
+            progress: viewModel.progress,
+            formattedDistance: viewModel.formattedDistance,
+            formattedPercent: viewModel.formattedPercent
+        )
     }
 
     private var sideQuestSection: some View {

@@ -16,6 +16,10 @@ struct JourneyCardView: View {
         destinationType == .fantasy ? .purple : AppTheme.primaryGradientStart
     }
 
+    private var progressFraction: Double {
+        min(max(percentComplete / 100, 0), 1)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: AppTheme.spacingMD) {
             HStack {
@@ -50,7 +54,7 @@ struct JourneyCardView: View {
                                 endPoint: .trailing
                             )
                         )
-                        .frame(width: max(0, geo.size.width * (percentComplete / 100)), height: 10)
+                        .frame(width: geo.size.width * progressFraction, height: 10)
                         .animation(.easeInOut(duration: 0.6), value: percentComplete)
                 }
             }

@@ -17,6 +17,8 @@ FirstStep/
 ├── Features/
 │   ├── Home/
 │   │   ├── HomeView.swift          Main dashboard screen
+│   │   ├── JourneySectionView.swift Live map section wrapper + empty state
+│   │   ├── LiveMapView.swift       Stylized route preview surface
 │   │   ├── StepCardView.swift      Circular step-count display
 │   │   └── JourneyCardView.swift   Active journey progress card
 │   └── SideQuests/
@@ -56,8 +58,9 @@ FirstStep/
 
 | Screen | Description |
 |--------|-------------|
-| **Home / Dashboard** | Header with date, circular step-count ring, HealthKit connect button, active journey progress card, side-quest list |
+| **Home / Dashboard** | Header with date, circular step-count ring, HealthKit connect button, live route preview, active journey progress card, side-quest list |
 | **Step Card** | Animated circular progress ring showing today's steps against a 10K goal |
+| **Live Map Section** | Destination-aware route preview surface with a stylized trail and progress marker |
 | **Journey Card** | Journey name, linear progress bar, distance walked, destination type badge |
 | **Side Quest Cards** | Placeholder challenge cards that expose deferred rules/status without fake completion logic |
 
@@ -75,6 +78,7 @@ FirstStep/
 - **Protocol-oriented services** — every external dependency is behind a protocol with a stub
 - **`@MainActor` safety** — HealthKitManager and StepsViewModel are main-actor isolated
 - **Sample data** — demo journey and side quests are pre-loaded so the UI demonstrates real visuals
+- **Live route preview** — Home exposes a dedicated journey-map surface now, while real MapKit routing remains deferred behind `RouteProgressService`
 - **Deferred side-quest engine** — side-quest rule types and evaluation states exist now, while complex rule execution remains turned off
 - **Prompt-to-journey planning layer** — free-form user prompts can flow through real-route lookup first and AI generation as a fallback
 - **Design system** — `AppTheme` provides consistent colors, gradients, spacing, and corner radii
@@ -85,7 +89,7 @@ FirstStep/
 |---|---|
 | Firebase backend | `BackendService` protocol + `StubBackendService` |
 | Prompted custom routes | `JourneyPlanningService` + `JourneyPromptViewModel` scaffolding; no UI yet |
-| Route visualization | `RouteProgressService` protocol + stub |
+| Route visualization | Home includes a stylized live preview; real MapKit routing still sits behind `RouteProgressService` protocol + stub |
 | Street View imagery | `StreetViewService` protocol + stub |
 | Fantasy scene generation | `FantasySceneService` protocol + stub |
 | Destination picker | Sample journey auto-loaded; prompt/picker UI not yet built |
